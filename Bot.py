@@ -1,38 +1,36 @@
 import discord
-import time
-from RPS101.RPS101 import RPS101
-from Utils import ProfanityFilter
+#from Modules.RPS101 import RPS101
+from WordFilter import *
+from Utils import Utils
+from Utils import  Configuration
 
 
 class MyClient(discord.Client):
-
-    RPSEnabled = True
-    rps = RPS101()
-    ProfanityFilterEnabled = True
-    ProfanityFilter = ProfanityFilter()
-
+    #rps = RPS101()
+    WordFilter = None
+    Ready = False
+    Utils = Utils()
+    conf = Configuration()
     async def on_ready(self):
         print('Logged on as', self.user)
+        self.WordFilter = Filter(Configuration.banned_words_path_severe,
+                                 self.conf.banned_words_path_moderate)
+        self.Ready = True
 
     async def on_message(self, message):
-        return_messages = []
-        if self.ProfanityFilterEnabled:
-            if await self.ProfanityFilter.has_profanity(message.content):
-                await client.add_roles(message.author, discord.utils.get(message.server.roles, id="533938366044045312"))
-        if message.content.startswith(';'):
-            # don't respond to ourselves
-            if message.author == self.user:
-                return
-            if self.RPSEnabled:
-                return_messages.append(await MyClient.rps.handle_command(message))
-            if return_messages != [None]:
-                if len(return_messages) == 1:
-                    await client.send_message(message.channel, return_messages[0].message_content)
-                else:
-                    for current_message in return_messages:
-                        await client.send_message(message.channel, current_message)
-                        time.sleep(3)
+        if self.Ready:
+            if Configuration.profanity_filter_enabled == 'True':
+                await self.WordFilter.handle_command(message, self)
+            if message.content.startswith(Configuration.prefix):
+                message.content = message.content.strip()[1:]
+                if message.author == self.user:
+                    return
+                #if Configuration.rps_enabled:
+                   # await MyClient.rps.handle_command(message)
+                await self.Utils.handle_command(message, self)
+            if message.attachments and message.channel.id == Configuration.selfies_channel:
+                await client.add_reaction(message, "\U00002764")
 
 
 client = MyClient()
-client.run('NDMwNzYxNTY5NTMwNDEzMDk2.D3aphw.lyFK0GGGftMvox1jriEEgJeQ0ao') 
+client.run('NTYxODQ5NzYxNDQ0MTM0OTM0.XKCNZA.p1WNvRVKSsvxzRmfiP67G-I5qgE')
