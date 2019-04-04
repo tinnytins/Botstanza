@@ -29,9 +29,14 @@ class Filter:
                 await client.delete_message(message)
                 await client.add_roles(message.author,
                                        discord.utils.get(message.server.roles, id=Configuration.mute_role))
+                if message.author.nick != "":
+                    name = message.author.nick
+                else:
+                    name = message.author.name
+
                 await client.send_message(
                     discord.utils.get(message.server.channels, id=Configuration.staff_channel),
-                    "Muted " + message.author.nick + " for profanity, they said: ```" + message.content + "```")
+                    "Muted " + name + " for profanity, they said: ```" + message.content + "```")
             else:
                 await client.delete_message(message)
                 await client.send_message(message.channel,
