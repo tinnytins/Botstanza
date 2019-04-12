@@ -7,17 +7,21 @@ class Utils:
     async def handle_command(self, message, client):
         if message.content.startswith("report"):
             await client.send_message(discord.utils.get(
-                                        message.server.channels, id=Configuration.report_channel),
-                                            "user *{0}* has reported user *{1}* for \"{2}\""
-                                            .format(message.author.nick,
-                                            message.content.split(" ")[1],
-                                            message.content.split(" ", 2)[2]).strip())
+                message.server.channels, id=Configuration.report_channel),
+                "user *{0}* has reported user *{1}* for \"{2}\""
+                    .format(message.author.nick,
+                            message.content.split(" ")[1],
+                            message.content.split(" ", 2)[2]).strip())
         if message.content.startswith("suggest") and Configuration.suggestions_enabled:
+            if message.author.nick is not None:
+                name = message.author.nick
+            else:
+                name = message.author.name
             sent_message = await client.send_message(discord.utils.get(
-                                                      message.server.channels, id=Configuration.suggestions_channel),
-                                                      "*{0}* suggested: {1} ".format(message.author.nick,
-                                                                                   message.content.split("suggest",
-                                                                                                         1)[1]))
+                message.server.channels, id=Configuration.suggestions_channel),
+                "*{0}* suggested: {1} ".format(name,
+                                               message.content.split("suggest",
+                                                                     1)[1]))
             await client.add_reaction(sent_message, "\U0001F44D")
             await client.add_reaction(sent_message, "\U0001F44E")
         if message.content.startswith("convert"):
@@ -36,17 +40,16 @@ class Utils:
                 or len(split_values) < 3 or not split_values[2].isnumeric():
             return "invalid params"
         elif first_unit == "f" and second_unit == "c":
-            return str(round((int(split_values[2])-32)*(5/9), 2)) + second_unit
+            return str(round((int(split_values[2]) - 32) * (5 / 9), 2)) + second_unit
         elif first_unit == "c" and second_unit == "f":
-            return str(round(int(split_values[2])*(9/5)+32, 2)) + second_unit
+            return str(round(int(split_values[2]) * (9 / 5) + 32, 2)) + second_unit
         elif first_unit == "ft" and second_unit == "cm":
-            return str(round(int(split_values[2])*30, 2)) + second_unit
+            return str(round(int(split_values[2]) * 30, 2)) + second_unit
         elif first_unit == "cm" and second_unit == "ft":
-            return str(round(int(split_values[2])/30, 2)) + second_unit
+            return str(round(int(split_values[2]) / 30, 2)) + second_unit
 
 
 class Configuration:
-
     # general
     bot_token = ""
     staff_channel = ""

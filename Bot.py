@@ -1,6 +1,6 @@
 import discord
 #from Modules.RPS101 import RPS101
-from WordFilter import *
+from Modules.WordFilter import *
 from Utils import Utils
 from Utils import  Configuration
 
@@ -33,4 +33,4 @@ class MyClient(discord.Client):
 
 
 client = MyClient()
-client.run('NTYxODQ5NzYxNDQ0MTM0OTM0.XKCNZA.p1WNvRVKSsvxzRmfiP67G-I5qgE')
+client.run(Configuration.bot_token)
