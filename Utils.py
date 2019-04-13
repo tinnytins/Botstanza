@@ -1,6 +1,5 @@
 import json
 import discord
-import jsonpickle
 
 class Utils:
 
@@ -52,7 +51,6 @@ class Utils:
 
 class Configuration(object):
     # general
-    server = ""
     bot_token = ""
     staff_channel = ""
     mute_role = ""
@@ -77,7 +75,6 @@ class Configuration(object):
     @staticmethod
     def __init__():
         conf = json.load(open("conf.json", "r"))
-        Configuration.server = conf["server"]
         Configuration.bot_token = conf["BotToken"]
         Configuration.rps_enabled = conf["RPSEnabled"]
         Configuration.filter_enabled = conf["ProfanityFilterEnabled"]
