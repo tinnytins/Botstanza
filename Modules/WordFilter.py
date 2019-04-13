@@ -1,6 +1,7 @@
 from enum import Enum
-from Utils import Configuration
+from Utils import *
 import discord
+
 
 class Filter:
     words_severe = []
@@ -13,41 +14,45 @@ class Filter:
         self.load_lists(severe_path, moderate_path)
 
     async def handle_command(self, message, client):
-        if message.content.startswith('addword') and message.author.server_permissions.administrator:
-            result = await self.add_word(message.content.split(' ')[1].lower())
-        elif message.content.startswith('removeword') and message.author.server_permissions.administrator:
-            result = await self.remove_word(message.content.split(' ')[1].lower())
-        elif message.content.startswith('savewords') and message.author.server_permissions.administrator:
-            result = await self.save_words()
-        elif message.content.startswith('reloadlists') and message.author.server_permissions.administrator:
-            result = await self.load_lists(self.severe_path, self.moderate_path)
-        else:
-            result = await self.has_profanity(message.content)
-
-        if result != ProfanitySeverity.NoProfanity and result is not None:
-            if result == ProfanitySeverity.Severe:
-                await client.delete_message(message)
-                await client.add_roles(message.author,
-                                       discord.utils.get(message.server.roles, id=Configuration.mute_role))
-                if message.author.nick != "":
-                    name = message.author.nick
-                else:
-                    name = message.author.name
-
-                await client.send_message(
-                    discord.utils.get(message.server.channels, id=Configuration.staff_channel),
-                    "Muted " + name + " for profanity, they said: ```" + message.content + "```")
+        if message.channel.id not in Configuration.filter_excluded_channels:
+            if message.content.startswith('addword') and message.author.server_permissions.administrator:
+                result = await self.add_word(message.content.split(' ')[1].lower())
+            elif message.content.startswith('removeword') and message.author.server_permissions.administrator:
+                result = await self.remove_word(message.content.split(' ')[1].lower())
+            elif message.content.startswith('savewords') and message.author.server_permissions.administrator:
+                result = await self.save_words()
+            elif message.content.startswith('reloadlists') and message.author.server_permissions.administrator:
+                result = await self.load_lists(self.severe_path, self.moderate_path)
             else:
-                await client.delete_message(message)
-                await client.send_message(message.channel,
-                                          message.author.nick + " " + "https://pbs.twimg.com/media/BlbsEdPCcAANrC9.jpg")
+                result = await self.has_profanity(message.content)
+
+            if result != ProfanitySeverity.NoProfanity and result is not None:
+                if result == ProfanitySeverity.Severe:
+                    await client.delete_message(message)
+                    await client.add_roles(message.author,
+                                           discord.utils.get(message.server.roles, id=Configuration.mute_role))
+                    if message.author.nick is not None:
+                        name = message.author.nick
+                    else:
+                        name = message.author.name
+
+                    await client.send_message(
+                        discord.utils.get(message.server.channels, id=Configuration.staff_channel),
+                        "Muted " + name + " for profanity, they said: ```" + message.content + "```")
+                else:
+                    await client.delete_message(message)
+                    await client.send_message(message.channel,
+                                              "https://pbs.twimg.com/media/BlbsEdPCcAANrC9.jpg")
 
     async def has_profanity(self, message_text):
         for word in message_text.split(' '):
-            if word.lower() in self.words_severe:
-                return ProfanitySeverity.Severe
-            elif word.lower() in Filter.words_light:
-                return ProfanitySeverity.Moderate
+            word = word.translate({ord(c): None for c in "\",.'-=+)(*&^%$£!¬`|\\?<>#~"})
+            for banned_word in self.words_severe:
+                if word.lower() == banned_word:
+                    return ProfanitySeverity.Severe
+            for banned_word in self.words_light:
+                if word.lower() == banned_word:
+                    return ProfanitySeverity.Moderate
         return ProfanitySeverity.NoProfanity
 
     async def add_word(self, word):
