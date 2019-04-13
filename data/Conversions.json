@@ -1,0 +1,25 @@
+{
+  "Conversions": [
+    {
+      "UnitA": "f",
+      "UnitB": "c",
+      "AtoB": "({0} - 32) * (5 / 9)",
+      "BtoA": "{0} * (9 / 5) + 32",
+      "count": "0"
+    },
+    {
+      "UnitA": "ft",
+      "UnitB": "cm",
+      "AtoB": "{0} * 30",
+      "BtoA": "{0} / 12",
+      "count": "0"
+    },
+    {
+      "UnitA": "kg",
+      "UnitB": "st",
+      "AtoB": "{0} * 6.35",
+      "BtoA": "{0} / 6.35",
+      "count": "0"
+    }
+  ]
+}
